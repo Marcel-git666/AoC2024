@@ -13,7 +13,7 @@ enum Day02 {
         
         let result = day02Part1(input1)
         print(result)
-//        print(day01Part2(input1))
+        print(day02Part2(input1))
     }
 }
 
@@ -52,4 +52,59 @@ func isDescending(_ report: [Int]) -> Bool {
     }
 //    print("\(report) is descending.")
     return true
+}
+
+func day02Part2(_ input: String) -> Int {
+    let lines = input.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines)}
+    print(lines)
+    var sum = 0
+    lines.forEach { line in
+        let report = line.split(separator: " ") .compactMap { Int($0) }
+        if checkReportWithError(report) {
+            sum += 1
+        }
+    }
+    return sum
+}
+
+func checkReportWithError(_ report: [Int]) -> Bool {
+    isAscendingWithError(report) || isDescendingWithError(report)
+}
+
+func isAscendingWithError(_ report: [Int]) -> Bool {
+    if isAscending(report) {
+        print("\(report) is ascending.")
+        return true
+    }
+    var i = 0
+    var rep = report
+    while i < report.count {
+        rep.remove(at: i)
+        if isAscending(rep) {
+            print("\(rep) is ascending.")
+            return true
+        }
+        rep = report
+        i += 1
+    }
+    return false
+}
+
+func isDescendingWithError(_ report: [Int]) -> Bool {
+    if isDescending(report) {
+        print("\(report) is ascending.")
+        return true
+    }
+    var i = 0
+    var rep = report
+    while i < report.count {
+        rep.remove(at: i)
+        if isDescending(rep) {
+            print("\(rep) is descending.")
+            return true
+        }
+        rep = report
+        i += 1
+    }
+    return false
 }
