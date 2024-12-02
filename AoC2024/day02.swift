@@ -19,13 +19,10 @@ enum Day02 {
 
 func day02Part1(_ input: String) -> Int {
     let lines = input.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines)}
-    print(lines)
-    var sum = 0
-    lines.forEach { line in
+
+    let sum = lines.reduce (0) { sum, line in
         let report = line.split(separator: " ") .compactMap { Int($0) }
-        if checkReport(report) {
-            sum += 1
-        }
+        return checkReport(report) ? sum + 1: sum
     }
     return sum
 }
@@ -40,7 +37,6 @@ func isAscending(_ report: [Int]) -> Bool {
             return false
         }
     }
-//    print("\(report) is ascending.")
     return true
 }
 
@@ -50,20 +46,21 @@ func isDescending(_ report: [Int]) -> Bool {
             return false
         }
     }
-//    print("\(report) is descending.")
     return true
 }
 
 func day02Part2(_ input: String) -> Int {
     let lines = input.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines)}
-    print(lines)
-    var sum = 0
-    lines.forEach { line in
+    let sum = lines.reduce (0) { sum, line in
         let report = line.split(separator: " ") .compactMap { Int($0) }
-        if checkReportWithError(report) {
-            sum += 1
-        }
+        return checkReportWithError(report) ? sum + 1: sum
     }
+//    lines.forEach { line in
+//        let report = line.split(separator: " ") .compactMap { Int($0) }
+//        if checkReportWithError(report) {
+//            sum += 1
+//        }
+//    }
     return sum
 }
 
@@ -73,7 +70,6 @@ func checkReportWithError(_ report: [Int]) -> Bool {
 
 func isAscendingWithError(_ report: [Int]) -> Bool {
     if isAscending(report) {
-        print("\(report) is ascending.")
         return true
     }
     var i = 0
@@ -81,7 +77,6 @@ func isAscendingWithError(_ report: [Int]) -> Bool {
     while i < report.count {
         rep.remove(at: i)
         if isAscending(rep) {
-            print("\(rep) is ascending.")
             return true
         }
         rep = report
@@ -92,7 +87,6 @@ func isAscendingWithError(_ report: [Int]) -> Bool {
 
 func isDescendingWithError(_ report: [Int]) -> Bool {
     if isDescending(report) {
-        print("\(report) is ascending.")
         return true
     }
     var i = 0
@@ -100,7 +94,6 @@ func isDescendingWithError(_ report: [Int]) -> Bool {
     while i < report.count {
         rep.remove(at: i)
         if isDescending(rep) {
-            print("\(rep) is descending.")
             return true
         }
         rep = report
