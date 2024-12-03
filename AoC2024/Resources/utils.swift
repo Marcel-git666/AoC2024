@@ -7,12 +7,20 @@
 
 import Foundation
 
-func readFile(_ name: String) -> String {
-    let projectURL = URL(fileURLWithPath: #file).deletingLastPathComponent()
+func readFile(_ name: String) throws -> String {
+    let projectURL = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
     let fileURL = projectURL.appendingPathComponent(name)
-    let data = try! Data(contentsOf: fileURL)
-    return String(data: data, encoding: .utf8)!
+    do {
+        let data = try Data(contentsOf: fileURL)
+        guard let result = String(data: data, encoding: .utf8) else {
+            throw NSError(domain: "FileReadError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Unable to decode file data"])
+        }
+        return result
+    } catch {
+        throw NSError(domain: "FileReadError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Error reading file: \(error)"])
+    }
 }
+
 
 extension String {
     var lines: [String] {

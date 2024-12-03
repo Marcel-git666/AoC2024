@@ -9,7 +9,7 @@ import Foundation
 
 enum Day02 {
     static func run() {
-        let input1 = readFile("day02.input")
+        let input1 = try! readFile("day02.input")
         
         let result = day02Part1(input1)
         print(result)

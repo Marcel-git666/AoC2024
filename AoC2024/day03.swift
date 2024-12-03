@@ -9,36 +9,52 @@ import Foundation
 
 enum Day03 {
     static func run() {
-        let input1 = readFile("day03.input")
-        
+        var input1: String = ""
+        do {
+            input1 = try readFile("day03.input")
+        } catch {
+            print("Error reading input file.")
+        }
         let result = day03Part1(input1)
         print(result)
-//        print(day03Part2(input1))
+        print(day03Part2(input1))
     }
 }
 
 func day03Part1(_ input: String) -> Int {
-    let pattern = #"mul\((\d{1,3}),(\d{1,3})\)"#
-
+    let pattern = /mul\((?<first>\d{1,3}),(?<second>\d{1,3})\)/
+    
     var sum = 0
-
-    do {
-        let regex = try NSRegularExpression(pattern: pattern)
-        let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
-        
-        for match in matches {
-            if let firstNumberRange = Range(match.range(at: 1), in: input),
-               let secondNumberRange = Range(match.range(at: 2), in: input) {
-                let firstNumber = Int(input[firstNumberRange]) ?? 0
-                let secondNumber = Int(input[secondNumberRange]) ?? 0
-                sum += firstNumber * secondNumber
-            }
+    
+    for match in input.matches(of: pattern) {
+        if let firstNumber = Int(match.first), let secondNumber = Int(match.second) {
+            sum += firstNumber * secondNumber
         }
-        
-        print("Sum of products: \(sum)")
-        return sum
-    } catch {
-        print("Invalid regex: \(error.localizedDescription)")
     }
-    return 0
+    
+    print("Sum of products: \(sum)")
+    return sum
 }
+
+func day03Part2(_ input: String) -> Int {
+    let pattern = /do\(\)|don\'t\(\)|mul\((?<first>\d{1,3}),(?<second>\d{1,3})\)/
+    
+    var sum = 0
+    var canMultiply = true
+    for match in input.matches(of: pattern) {
+        let string = match.0
+        if string == "do()" {
+            canMultiply = true
+        } else if string == "don't()" {
+            canMultiply = false
+        } else if canMultiply, let first = match.first, let second = match.second {
+            let firstNumber = Int(first) ?? 0
+            let secondNumber = Int(second) ?? 0
+            sum += firstNumber * secondNumber
+        }
+    }
+    print("Sum of products: \(sum)")
+    return sum
+}
+
+//var shouldMultiply = true
