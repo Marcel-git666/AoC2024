@@ -17,7 +17,7 @@ enum Day04 {
         }
         let result = day04Part1(input1)
         print(result)
-        //        print(day04Part2(input1))
+        print(day04Part2(input1))
     }
 }
 
@@ -60,6 +60,38 @@ func day04Part1(_ input: String) -> Int {
                         numberOfXmas += 1
                     }
                     
+                }
+            }
+        }
+    }
+    return numberOfXmas
+}
+
+func day04Part2(_ input: String) -> Int {
+    
+    // search pattern
+    //    M.S
+    //    .A.
+    //    M.S
+    
+    
+    var numberOfXmas = 0
+    var matrix = [[Character]]()
+    
+    let lines = input.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines)}
+    lines.forEach { line in
+        matrix.append(Array(line))
+    }
+    for row in 0..<matrix.count {
+        for col in 0..<matrix[row].count {
+            if matrix[row][col] == "A" {
+                // Check if the new position is out of bounds
+                if row - 1 < 0 || row + 1 >= matrix.count || col - 1 < 0 || col + 1 >= matrix[0].count {
+                    // do nothing
+                } else if (matrix[row - 1][col - 1] == "M" && matrix[row + 1][col + 1] == "S" || matrix[row - 1][col - 1] == "S" && matrix[row + 1][col + 1] == "M")
+                    &&
+                    (matrix[row - 1][col + 1] == "M" && matrix[row + 1][col - 1] == "S" || matrix[row - 1][col + 1] == "S" && matrix[row + 1][col - 1] == "M") {
+                    numberOfXmas += 1
                 }
             }
         }
