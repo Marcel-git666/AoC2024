@@ -11,7 +11,7 @@ enum Day05 {
     static func run() {
         var input: String = ""
         do {
-            input = try readFile("day05.input")
+            input = try readFile("day05.test")
         } catch {
             print("Error reading input file.")
         }
@@ -55,7 +55,7 @@ func day05Part1(_ dict: [Int: Set<Int>], updates: [[Int]]) -> Int {
             }
         }
         if isOk {
-            print(update[update.count/2])
+            // print(update[update.count/2])
             sum += update[update.count/2]
         }
     }
@@ -66,6 +66,7 @@ func day05Part1(_ dict: [Int: Set<Int>], updates: [[Int]]) -> Int {
 func day05Part2(_ dict: [Int: Set<Int>], updates: [[Int]]) -> Int {
     var sum = 0
     var isOk = true
+    var temp = [Int]()
     updates.forEach { update in
         for i in 0..<update.count - 1 {
             if dict[update[i]]?.contains(update[i+1]) ?? false {
@@ -73,15 +74,28 @@ func day05Part2(_ dict: [Int: Set<Int>], updates: [[Int]]) -> Int {
             }
             else {
                 isOk = false
+                temp = createCorrect(update, dict: dict)
                 break
             }
         }
-        if isOk {
-            print(update[update.count/2])
-            sum += update[update.count/2]
+        if !isOk {
+            print(temp[temp.count/2])
+            sum += temp[temp.count/2]
         }
     }
     
     return sum
 }
 
+func createCorrect(_ update: [Int], dict: [Int: Set<Int>]) -> [Int] {
+    var result: [Int] = update
+    for i in 1..<result.count - 1 {
+        if dict[result[i-1]]?.contains(result[i]) == nil {
+            let temp = result[i-1]
+            result[i-1] = result[i]
+            result[i] = temp
+        }
+    }
+    
+    return result
+}
