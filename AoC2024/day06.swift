@@ -17,7 +17,7 @@ enum Day06 {
         }
         let result = day06Part1(getMap(input))
         print(result)
-//        print(day05Part2(getDictionary(parts[0]), updates: getUpdates(parts[1])))
+        print(day06Part2(getMap(input)))
     }
 }
 
@@ -34,7 +34,7 @@ func day06Part1(_ input: [[Character]]) -> Int {
         ( 1, 0),    // Down
         ( 0, -1)    // Left
     ]
-    print(input)
+    //print(input)
     var map = input
     var row = 0
     var col = 0
@@ -74,4 +74,70 @@ func findStartingPosition(_ map: [[Character]]) -> (Int, Int) {
         }
     }
     return (-1, -1)
+}
+
+
+func day06Part2(_ input: [[Character]]) -> Int {
+    
+    //print(input)
+    let map = input
+//    var row = 0
+//    var col = 0
+    var sum = 0
+    var rowG = 0
+    var colG = 0
+    (rowG, colG) = findStartingPosition(input)
+    for row in 0..<map.count {
+        for col in 0..<map[0].count {
+            if (map[row][col] != "#" && !(row == rowG && col == colG)) {
+                let modifiedMap = modifyMapAtPosition(map: map, row: row, col: col)
+                if checkInfinitePath(input: modifiedMap, rowG: rowG, colG: colG) {
+                    sum += 1
+                }
+            }
+        }
+    }
+    print("Row: \(map.count), col: \(map[0].count)")
+    return sum
+}
+
+func checkInfinitePath(input: [[Character]], rowG: Int, colG: Int) -> Bool {
+    let directions = [
+        (-1, 0),    // Top
+        ( 0, 1),    // Right
+        ( 1, 0),    // Down
+        ( 0, -1)    // Left
+    ]
+    let map = input
+    var directionCounter = 0
+    var infinityCounter = 0
+    var row = rowG
+    var col = colG
+
+//    print("Guard is at \(row), \(col) heading \(map[row][col])")
+
+    while infinityCounter < 8000 && (!(row < 0 || row >= map.count || col < 0 || col >= map[0].count)) {
+        infinityCounter += 1
+        if row + directions[directionCounter].0 < 0 || row + directions[directionCounter].0 >= map.count || col + directions[directionCounter].1 < 0 ||
+            col + directions[directionCounter].1 >= map[0].count {
+            break
+        }
+        if map[row + directions[directionCounter].0][col + directions[directionCounter].1] == "#" {
+            directionCounter = (directionCounter + 1) % 4
+        }
+        row = row + directions[directionCounter].0
+        col = col + directions[directionCounter].1
+    }
+    if infinityCounter > 7900 {
+//        print("Infinite: \(infinityCounter)")
+        return true
+    } else {
+        return false
+    }
+}
+
+func modifyMapAtPosition(map: [[Character]], row: Int, col: Int) -> [[Character]] {
+    var modifiedMap = map
+    modifiedMap[row][col] = "#"
+    return modifiedMap
 }
