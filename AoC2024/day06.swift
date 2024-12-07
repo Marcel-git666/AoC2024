@@ -77,19 +77,14 @@ func findStartingPosition(_ map: [[Character]]) -> (Int, Int) {
 }
 
 
-func day06Part2(_ input: [[Character]]) -> Int {
-    
-    //print(input)
-    let map = input
-//    var row = 0
-//    var col = 0
+func day06Part2(_ map: [[Character]]) -> Int {
     var sum = 0
     var rowG = 0
     var colG = 0
-    (rowG, colG) = findStartingPosition(input)
+    (rowG, colG) = findStartingPosition(map)
     for row in 0..<map.count {
         for col in 0..<map[0].count {
-            if (map[row][col] != "#" && !(row == rowG && col == colG)) {
+            if (map[row][col] == ".") {
                 let modifiedMap = modifyMapAtPosition(map: map, row: row, col: col)
                 if checkInfinitePath(input: modifiedMap, rowG: rowG, colG: colG) {
                     sum += 1
@@ -97,7 +92,6 @@ func day06Part2(_ input: [[Character]]) -> Int {
             }
         }
     }
-    print("Row: \(map.count), col: \(map[0].count)")
     return sum
 }
 
@@ -108,33 +102,37 @@ func checkInfinitePath(input: [[Character]], rowG: Int, colG: Int) -> Bool {
         ( 1, 0),    // Down
         ( 0, -1)    // Left
     ]
-    let map = input
     var directionCounter = 0
-    var infinityCounter = 0
     var row = rowG
     var col = colG
+    var visitedStates = Set<[Int]>() // Track visited states as [row, col, direction]
+    
+    while !(row < 0 || row >= input.count || col < 0 || col >= input[0].count) {
+        let state = [row, col, directionCounter]
+        if visitedStates.contains(state) {
+            return true // Cycle detected
+        }
+        visitedStates.insert(state)
 
-//    print("Guard is at \(row), \(col) heading \(map[row][col])")
+        let nextRow = row + directions[directionCounter].0
+        let nextCol = col + directions[directionCounter].1
 
-    while infinityCounter < 8000 && (!(row < 0 || row >= map.count || col < 0 || col >= map[0].count)) {
-        infinityCounter += 1
-        if row + directions[directionCounter].0 < 0 || row + directions[directionCounter].0 >= map.count || col + directions[directionCounter].1 < 0 ||
-            col + directions[directionCounter].1 >= map[0].count {
+        // Boundary check
+        if nextRow < 0 || nextRow >= input.count || nextCol < 0 || nextCol >= input[0].count {
             break
         }
-        if map[row + directions[directionCounter].0][col + directions[directionCounter].1] == "#" {
+
+        // Obstruction check
+        if input[nextRow][nextCol] == "#" {
             directionCounter = (directionCounter + 1) % 4
+        } else {
+            row = nextRow
+            col = nextCol
         }
-        row = row + directions[directionCounter].0
-        col = col + directions[directionCounter].1
     }
-    if infinityCounter > 7900 {
-//        print("Infinite: \(infinityCounter)")
-        return true
-    } else {
-        return false
-    }
+    return false
 }
+
 
 func modifyMapAtPosition(map: [[Character]], row: Int, col: Int) -> [[Character]] {
     var modifiedMap = map
