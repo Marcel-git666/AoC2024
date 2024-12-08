@@ -21,6 +21,11 @@ func readFile(_ name: String) throws -> String {
     }
 }
 
+func getCharMap(_ input: String) -> [[Character]] {
+    input.split(separator: "\n").map { line in
+        Array(line)
+    }
+}
 
 extension String {
     var lines: [String] {

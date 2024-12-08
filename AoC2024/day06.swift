@@ -15,17 +15,12 @@ enum Day06 {
         } catch {
             print("Error reading input file.")
         }
-        let result = day06Part1(getMap(input))
+        let result = day06Part1(getCharMap(input))
         print(result)
-        print(day06Part2(getMap(input)))
+        print(day06Part2(getCharMap(input)))
     }
 }
 
-func getMap(_ input: String) -> [[Character]] {
-    input.split(separator: "\n").map { line in
-        Array(line)
-    }
-}
 
 func day06Part1(_ input: [[Character]]) -> Int {
     let directions = [
