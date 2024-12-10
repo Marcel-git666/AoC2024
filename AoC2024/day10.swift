@@ -22,9 +22,9 @@ enum Day10 {
 }
 
 func day10Part1(_ input: [[Int]]) -> Int {
-    print(input)
     var countNines = 0
     let starts = findStartingPoint(input)
+    
     for startHead in starts {
         countNines += findTrailToNine(input, startingPosition: startHead)
     }
@@ -73,7 +73,6 @@ func getIntMap(_ input: String) -> [[Int]] {
 }
 
 func day10Part2(_ input: [[Int]]) -> Int {
-    print(input)
     var countTrails: Int = 0
     let starts = findStartingPoint(input)
     for startHead in starts {
