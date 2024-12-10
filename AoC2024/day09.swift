@@ -42,9 +42,6 @@ func day09Part1(_ map: String) -> Int {
         return calculateChecksum(segments) // If no file or free space exists, calculate checksum immediately
     }
     
-    var lastFileIndexVar = lastFileIndex
-    var freeSpaceIndexVar = freeSpaceIndex
-    
     while hasFreeSpace(segments) {
         //moveBlock(&segments, lastFileIndex: &lastFileIndexVar, freeSpaceIndex: &freeSpaceIndexVar)
         compactDisk(&segments)
