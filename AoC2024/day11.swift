@@ -7,194 +7,98 @@
 
 import Foundation
 
-enum Day11 {
-    static func run() async {
+class Day11 {
+    @MainActor private static var cache = [String: Int]() // Shared cache for memoization
+
+    @MainActor static func run() {
         var input: String = ""
+        
+        print("Let the war begin!")
         do {
-            input = try readFile("day11.test")
+            input = try readFile("day11.input")
             print("File loaded: \(input)")
         } catch {
             print("Error reading input file.")
         }
-        let result = day11Part1(getIntArray(input))
-        print(result)
-        let result2 = await day11Part2Parallel(getIntArray(input), iterations: 5)
-        print(result2)
+
+        // Part 1
+        let part1Result = day11Part1(getIntArray(input))
+        print("Part 1 Result: \(part1Result)")
+
+        // Part 2
+        let part2Result = part2(getIntArray(input))
+        print("Part 2 Result: \(part2Result)")
     }
-}
 
-func getIntArray(_ input: String) -> [Int] {
-    input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: " ").map { Int(String($0)) ?? -1 }
-}
+    static func getIntArray(_ input: String) -> [Int] {
+        input.trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(separator: " ")
+            .map { Int(String($0)) ?? -1 }
+    }
 
-func day11Part1(_ input: [Int]) -> Int {
-    print(input)
-    var array = input
-    for counter in 1...25 {
-        if counter % 5 == 0 {
-            print("Counter: \(counter), array: \(array.count)")
-        }
-        var i = 0
-        while i < array.count {
-            switch array[i] {
-            case 0:
-                array[i] = 1
-            case let value where (Int(log10(Double(value))) + 1) % 2 == 0:
-                let digitCount = Int(log10(Double(array[i]))) + 1
-                let divisor = Int(pow(10.0, Double(digitCount / 2)))
-                let leftHalf = array[i] / divisor
-                let rightHalf = array[i] % divisor
-                array[i] = rightHalf
-                array.insert(leftHalf, at: i)
-                i += 1
-            default:
-                array[i] *= 2024
+    static func day11Part1(_ input: [Int]) -> Int {
+        var array = input
+        for counter in 1...25 {
+            if counter % 5 == 0 {
+                print("Counter: \(counter), array count: \(array.count)")
             }
-            i += 1
-        }
-        // print(array)
-    }
-    return array.count
-}
-
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        stride(from: 0, to: count, by: size).map {
-            Array(self[$0..<Swift.min($0 + size, count)])
-        }
-    }
-}
-
-
-func day11Part2Parallel(_ input: [Int], iterations: Int) async -> Int {
-    print(input)
-
-    // Split the input into smaller chunks
-    let chunks = input.chunked(into: 2) // Adjust chunk size as needed
-
-    // Process each chunk in parallel
-    async let results = chunks.map { processChunk($0, iterations: iterations) }
-
-    // Combine results
-    return await results.reduce(0, +)
-}
-
-func processChunk(_ chunk: [Int], iterations: Int) -> Int {
-    var array = chunk
-    for _ in 1...iterations {
-        var i = 0
-        while i < array.count {
-            if array[i] == 0 {
-                array[i] = 1
-            } else if (Int(log10(Double(array[i]))) + 1) % 2 == 0 {
-                let digitCount = Int(log10(Double(array[i]))) + 1
-                let divisor = Int(pow(10.0, Double(digitCount / 2)))
-                let leftHalf = array[i] / divisor
-                let rightHalf = array[i] % divisor
-                array[i] = rightHalf
-                array.insert(leftHalf, at: i)
+            var i = 0
+            while i < array.count {
+                switch array[i] {
+                case 0:
+                    array[i] = 1
+                case let value where (Int(log10(Double(value))) + 1) % 2 == 0:
+                    let digitCount = Int(log10(Double(array[i]))) + 1
+                    let divisor = Int(pow(10.0, Double(digitCount / 2)))
+                    let leftHalf = array[i] / divisor
+                    let rightHalf = array[i] % divisor
+                    array[i] = rightHalf
+                    array.insert(leftHalf, at: i)
+                    i += 1
+                default:
+                    array[i] *= 2024
+                }
                 i += 1
+            }
+        }
+        return array.count
+    }
+
+    @MainActor static func apply(_ stone: Int, count: Int) -> Int {
+        // Base case: no iterations left
+        if count == 0 {
+            return 1
+        }
+
+        // Check the cache
+        let key = "\(stone)-\(count)"
+        if let cachedResult = cache[key] {
+            return cachedResult
+        }
+
+        // Recursive cases
+        let result: Int
+        if stone == 0 {
+            result = apply(1, count: count - 1)
+        } else {
+            let digits = Int(log10(Double(stone))) + 1
+            if digits % 2 == 0 {
+                let pow10 = Int(pow(10.0, Double(digits / 2)))
+                let leftHalf = stone / pow10
+                let rightHalf = stone % pow10
+                result = apply(leftHalf, count: count - 1) + apply(rightHalf, count: count - 1)
             } else {
-                array[i] *= 2024
+                result = apply(stone * 2024, count: count - 1)
             }
-            i += 1
         }
+
+        // Store result in cache
+        cache[key] = result
+        return result
     }
-    return array.count
+
+    @MainActor static func part2(_ stones: [Int]) -> Int {
+        // Process each stone in the array
+        stones.reduce(0) { $0 + apply($1, count: 75) }
+    }
 }
-
-
-//func day11Part2(_ input: [Int]) -> Int {
-//    print(input)
-//    // var linkedLists: [LinkedList<Int>] = []
-//    var sum = 0
-//    for value in input {
-//        var linkedList = LinkedList<Int>()
-//        linkedList.append(value)
-//        sum += processStone(linkedList)
-//    }
-//    return sum
-//}
-//
-//func processStone(_ ll: LinkedList<Int>) -> Int {
-//    var linkedList = ll
-//    for counter in 1...75 {
-//        if counter % 5 == 0 {
-//            print("Counter: \(counter), ll: \(linkedList.count)")
-//        }
-//        var current = linkedList.head
-//        while current != nil {
-//            if current!.value == 0 {
-//                // Transform `0` into `1`
-//                current!.value = 1
-//                current = current?.next
-//            } else if (Int(log10(Double(current!.value))) + 1) % 2 == 0 {
-//                // Split even-digit number
-//                let digitCount = Int(log10(Double(current!.value))) + 1
-//                let divisor = Int(pow(10.0, Double(digitCount / 2)))
-//                let leftHalf = current!.value / divisor
-//                let rightHalf = current!.value % divisor
-//                
-//                current!.value = leftHalf
-//                let newNode = Node(value: rightHalf, next: current?.next)
-//                if current === linkedList.tail {
-//                    linkedList.tail = newNode // Update tail if needed
-//                }
-//                current?.next = newNode
-//                
-//                // Move to the newly inserted node
-//                current = newNode.next
-//            } else {
-//                // Default case: multiply by 2024
-//                current!.value *= 2024
-//                current = current?.next
-//            }
-//        }
-//    }
-//    return linkedList.count
-//}
-
-//func day11Part2(_ input: [Int]) -> Int {
-//    print(input)
-//    var linkedList: LinkedList<Int> = LinkedList()
-//    
-//    for value in input {
-//        linkedList.append(value)
-//    }
-//    for counter in 1...75 {
-//        if counter % 5 == 0 {
-//            print("Counter: \(counter), ll: \(linkedList.count)")
-//        }
-//        var current = linkedList.head
-//        while current != nil {
-//            if current!.value == 0 {
-//                // Transform `0` into `1`
-//                current!.value = 1
-//                current = current?.next
-//            } else if (Int(log10(Double(current!.value))) + 1) % 2 == 0 {
-//                // Split even-digit number
-//                let digitCount = Int(log10(Double(current!.value))) + 1
-//                let divisor = Int(pow(10.0, Double(digitCount / 2)))
-//                let leftHalf = current!.value / divisor
-//                let rightHalf = current!.value % divisor
-//                
-//                current!.value = leftHalf
-//                let newNode = Node(value: rightHalf, next: current?.next)
-//                if current === linkedList.tail {
-//                    linkedList.tail = newNode // Update tail if needed
-//                }
-//                current?.next = newNode
-//                
-//                // Move to the newly inserted node
-//                current = newNode.next
-//            } else {
-//                // Default case: multiply by 2024
-//                current!.value *= 2024
-//                current = current?.next
-//            }
-//        }
-//        
-//        // print(linkedList.description)
-//    }
-//    return linkedList.count
-//}
